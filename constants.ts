@@ -1,4 +1,4 @@
-import { MarketType, ResourceLink } from './types';
+import { MarketType, ResourceLink, StockDataPoint } from './types';
 
 export const US_RESOURCES: ResourceLink[] = [
   { name: 'Finviz', url: 'https://finviz.com/', description: 'Stock screener and market visualization', category: 'Chart' },
@@ -24,25 +24,47 @@ export const NAV_ITEMS = [
   { label: 'Overview', path: '/' },
   { label: 'US Market', path: '/us' },
   { label: 'KR Market', path: '/kr' },
+  { label: 'Pro Chart', path: '/pro-chart' },
 ];
 
-// Mock data generator for charts since we don't have a live market data API
-export const generateMockData = (days: number, startPrice: number): { date: string; price: number; volume: number }[] => {
-  const data = [];
+// Mock data generator with Envelopes and MA
+export const generateMockData = (days: number, startPrice: number): StockDataPoint[] => {
+  const data: StockDataPoint[] = [];
   let price = startPrice;
   const now = new Date();
   
+  // History buffer for MA calculation
+  const history: number[] = [];
+  for(let i=0; i<20; i++) history.push(startPrice);
+
   for (let i = days; i > 0; i--) {
     const date = new Date(now);
     date.setDate(date.getDate() - i);
     
-    const change = (Math.random() - 0.5) * (startPrice * 0.05); // 5% volatility
+    // Random walk with trend
+    const volatility = startPrice * 0.03;
+    const change = (Math.random() - 0.5) * volatility;
     price += change;
     
+    // Keep history for MA
+    history.push(price);
+    if(history.length > 20) history.shift();
+
+    // Calculate MA20
+    const ma20 = history.reduce((a, b) => a + b, 0) / history.length;
+    
+    // Calculate Envelope (Bollinger Band style: MA20 +/- 2 std dev sim)
+    // Simplified envelope: MA +/- 5%
+    const upperBand = ma20 * 1.05;
+    const lowerBand = ma20 * 0.95;
+
     data.push({
       date: date.toISOString().split('T')[0],
       price: Number(price.toFixed(2)),
-      volume: Math.floor(Math.random() * 1000000) + 500000
+      volume: Math.floor(Math.random() * 1000000) + 500000,
+      ma20: Number(ma20.toFixed(2)),
+      upperBand: Number(upperBand.toFixed(2)),
+      lowerBand: Number(lowerBand.toFixed(2))
     });
   }
   return data;

@@ -6,7 +6,8 @@ import { MarketType, StockDataPoint, AIAnalysisResult } from './types';
 import StockChart from './components/StockChart';
 import AnalysisPanel from './components/AnalysisPanel';
 import ResourceList from './components/ResourceList';
-import { Search, LayoutDashboard, Globe, LineChart, Cpu } from 'lucide-react';
+import { StockHeatmap, ProChartWidget } from './components/MarketWidgets';
+import { Search, LayoutDashboard, Globe, LineChart, Cpu, CandlestickChart } from 'lucide-react';
 
 const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const location = useLocation();
@@ -17,12 +18,14 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       <header className="sticky top-0 z-50 bg-slate-900/80 backdrop-blur-md border-b border-slate-800">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-              <LineChart className="w-5 h-5 text-white" />
-            </div>
-            <span className="text-xl font-bold tracking-tight bg-gradient-to-r from-blue-400 to-emerald-400 bg-clip-text text-transparent">
-              odoc financial
-            </span>
+            <Link to="/" className="flex items-center gap-3">
+                <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+                <LineChart className="w-5 h-5 text-white" />
+                </div>
+                <span className="text-xl font-bold tracking-tight bg-gradient-to-r from-blue-400 to-emerald-400 bg-clip-text text-transparent">
+                odoc financial
+                </span>
+            </Link>
           </div>
           
           <nav className="hidden md:flex gap-1">
@@ -103,8 +106,9 @@ const MarketPage: React.FC<{ market: MarketType }> = ({ market }) => {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 mb-8 border-b border-slate-800 pb-6">
+    <div className="space-y-8">
+      {/* Top Section: Header & Search */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 border-b border-slate-800 pb-6">
         <div>
           <h1 className="text-3xl font-bold text-white mb-2">{market === MarketType.US ? 'US Market' : 'Korea Market'}</h1>
           <p className="text-slate-400 max-w-2xl text-sm">{marketSentiment || "Loading market sentiment..."}</p>
@@ -130,11 +134,11 @@ const MarketPage: React.FC<{ market: MarketType }> = ({ market }) => {
         </form>
       </div>
 
+      {/* Middle Section: Chart & Analysis */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
             <StockChart data={chartData} symbol={symbol} />
             <div className="hidden lg:block">
-              {/* Show Analysis here on desktop if desired, currently it's on the side or below */}
               <div className="h-[400px]">
                  <AnalysisPanel analysis={analysis} isLoading={loading} symbol={symbol} />
               </div>
@@ -150,8 +154,34 @@ const MarketPage: React.FC<{ market: MarketType }> = ({ market }) => {
             </div>
         </div>
       </div>
+
+      {/* Bottom Section: Heatmap */}
+      <div className="pt-8 border-t border-slate-800">
+        <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+            <LayoutDashboard className="w-5 h-5 text-purple-400" />
+            Market Heatmap ({market === MarketType.US ? 'S&P 500' : 'KRX'})
+        </h2>
+        <StockHeatmap market={market === MarketType.US ? 'US' : 'KR'} />
+      </div>
     </div>
   );
+};
+
+const ProChartPage = () => {
+    return (
+        <div className="h-[calc(100vh-10rem)] w-full flex flex-col">
+            <div className="mb-4">
+                <h1 className="text-2xl font-bold text-white flex items-center gap-2">
+                    <CandlestickChart className="w-6 h-6 text-emerald-400" />
+                    Professional Charting Platform
+                </h1>
+                <p className="text-slate-400 text-sm">Advanced technical analysis with TradingView engine.</p>
+            </div>
+            <div className="flex-grow rounded-xl overflow-hidden border border-slate-700 shadow-2xl">
+                <ProChartWidget />
+            </div>
+        </div>
+    );
 };
 
 const HomePage = () => {
@@ -190,6 +220,13 @@ const HomePage = () => {
               <span className="block text-lg font-bold text-white">South Korea</span>
             </div>
           </Link>
+          <Link to="/pro-chart" className="group bg-slate-800 hover:bg-slate-700 border border-slate-700 px-8 py-4 rounded-xl flex items-center gap-3 transition-all">
+            <CandlestickChart className="w-6 h-6 text-purple-400 group-hover:scale-110 transition-transform" />
+            <div className="text-left">
+              <span className="block text-xs text-slate-500 uppercase tracking-wider">Tool</span>
+              <span className="block text-lg font-bold text-white">Pro Chart</span>
+            </div>
+          </Link>
         </div>
       </div>
 
@@ -197,7 +234,7 @@ const HomePage = () => {
         <div className="bg-slate-900/50 p-6 rounded-xl border border-slate-800">
           <LineChart className="w-8 h-8 text-blue-500 mb-4" />
           <h3 className="text-lg font-bold text-white mb-2">Technical Analysis</h3>
-          <p className="text-slate-400 text-sm">Interactive charts tailored for rapid assessment of price action and volatility.</p>
+          <p className="text-slate-400 text-sm">Interactive charts with Envelope indicators (20, 5%) and Moving Averages.</p>
         </div>
         <div className="bg-slate-900/50 p-6 rounded-xl border border-slate-800">
           <Cpu className="w-8 h-8 text-purple-500 mb-4" />
@@ -205,9 +242,9 @@ const HomePage = () => {
           <p className="text-slate-400 text-sm">Powered by Gemini 2.5 Flash for instant summarization of bullish and bearish theses.</p>
         </div>
         <div className="bg-slate-900/50 p-6 rounded-xl border border-slate-800">
-          <Globe className="w-8 h-8 text-emerald-500 mb-4" />
-          <h3 className="text-lg font-bold text-white mb-2">Curated Resources</h3>
-          <p className="text-slate-400 text-sm">Direct links to official filings (SEC/DART) and institutional data sources.</p>
+          <LayoutDashboard className="w-8 h-8 text-emerald-500 mb-4" />
+          <h3 className="text-lg font-bold text-white mb-2">Market Heatmaps</h3>
+          <p className="text-slate-400 text-sm">Real-time visualization of market sectors and price movements for US & KR.</p>
         </div>
       </div>
     </div>
@@ -222,6 +259,7 @@ const App: React.FC = () => {
           <Route path="/" element={<HomePage />} />
           <Route path="/us" element={<MarketPage market={MarketType.US} />} />
           <Route path="/kr" element={<MarketPage market={MarketType.KR} />} />
+          <Route path="/pro-chart" element={<ProChartPage />} />
         </Routes>
       </Layout>
     </HashRouter>
