@@ -19,7 +19,7 @@ export const StockHeatmap: React.FC<HeatmapProps> = ({ market }) => {
     script.async = true;
     script.innerHTML = JSON.stringify({
       "exchanges": [],
-      "dataSource": market === 'US' ? "SPX500" : "KRX50", // US: S&P500, KR: KRX representation
+      "dataSource": market === 'US' ? "SPX500" : "KOSPI", // US: S&P500, KR: KOSPI
       "grouping": "sector",
       "blockSize": "market_cap_basic",
       "blockColor": "change",

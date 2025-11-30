@@ -1,16 +1,9 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { AIAnalysisResult } from "../types";
 
-// Initialize the Gemini client
-// We use import.meta.env for Vite-based projects. 
-// Make sure .env file has VITE_API_KEY defined.
-const apiKey = import.meta.env.VITE_API_KEY;
-
-if (!apiKey) {
-  console.warn("Missing VITE_API_KEY. AI features will not work.");
-}
-
-const ai = new GoogleGenAI({ apiKey: apiKey || "" });
+// Initialize the Gemini client using process.env.API_KEY as per guidelines.
+// The API key must be obtained exclusively from the environment variable process.env.API_KEY.
+const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
 const ANALYSIS_SCHEMA = {
   type: Type.OBJECT,
